@@ -39,11 +39,11 @@ git commit -m 'xxx'
 版本回退与撤销
 
 ```bash
-git reset --hard^
-#版本回退一次
+git reset --hard HEAD^
+#三区文件全部回退一个版本
 
 git reset --hard asadfa
-#版本回退到asadfa的commit id版本
+#三区文件回退到asadfa的commit id版本
 
 git reset HEAD
 #用版本库中的文件去替换暂存区的全部文件
