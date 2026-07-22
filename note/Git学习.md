@@ -16,6 +16,13 @@ Git是目前世界上最先进的分布式版本控制
 
 ## 2、Git使用
 
+确认用户名与邮箱
+
+```bash
+git config --global user.name username
+git config --global user.email email
+```
+
 初始化版本库
 
 ```bash
@@ -117,6 +124,12 @@ git fetch origin master:tmp
 
 ```bash
 git clone https
+```
+
+查看远程仓库信息
+
+```bash
+git remote -v
 ```
 
 fork可以实现将别人的项目clone一份，但是owner变成自己
