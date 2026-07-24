@@ -126,9 +126,24 @@ git push origin --delete v1.0.0
 
 tag与分支的区别
 
+分支可以继续加入其他文件
 
+tag创建后记录当时的所有文件状态
 
 迁移项目如何备份代码
+
+```bash
+git clone --mirror https
+#--mirror 会克隆所有分支、标签、notes 等全部引用
+
+git bundle create x.bundle --all
+#在现有仓库中打包所有内容为单个文件
+
+git clone x.bundle repository
+#从 bundle 恢复仓库
+```
+
+
 
 ## 3、GitHub使用
 
