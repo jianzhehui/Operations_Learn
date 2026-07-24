@@ -12,8 +12,15 @@ Git是目前世界上最先进的分布式版本控制
 工作区->暂存区: git add
 暂存区->版本区: git commit
 版本区->暂存区: git reset HEAD
-暂存区->工作区: git checkout -- file
-版本区->工作区: git checkout HEAD file
+版本区->服务器: git push
+服务器-->工作区: git pull
+暂存区->工作区: git checkout -- file 
+版本区-->工作区: git checkout HEAD file
+
+Note right of 服务器:Gitee、Github等
+Note right of 版本区:已经被Git版本控制
+Note right of 暂存区:暂时保存，将交给Git进行版本管理
+Note right of 工作区:项目文件夹，进行操作的区域
 ```
 
 
