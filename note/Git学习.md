@@ -46,6 +46,7 @@ git init
 
 ```bash
 git add xxx
+git add .
 ```
 
  提交暂存区所有文件到版本区
@@ -97,6 +98,37 @@ git checkout -d dev
 合并分支时，如果在同一个文件，在同一个地方，都修改了或新增内容会引起版本冲突。
 
 借助ide实现简单高效处理
+
+tag的使用
+
+```bash
+git tag -a v1.0.0 -m 'version:1.0.0'
+#创建标签，-a:版本 -m:描述
+
+git show v1.0.0
+#查看标签详细信息
+
+git tag
+#列出所有标签
+
+git push origin v1.0.0
+#推送单个标签
+
+git push origin --tags
+#推送所有标签
+
+git tag -d v1.0.0
+#删除本地标签
+
+git push origin --delete v1.0.0
+#删除远程标签
+```
+
+tag与分支的区别
+
+
+
+迁移项目如何备份代码
 
 ## 3、GitHub使用
 
