@@ -143,8 +143,6 @@ git clone x.bundle repository
 #从 bundle 恢复仓库
 ```
 
-
-
 ## 3、GitHub使用
 
 借助GitHub实现分享代码和配合开发
