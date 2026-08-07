@@ -134,8 +134,13 @@ tag创建后记录当时的所有文件状态
 
 ```bash
 git clone --mirror https
-#--mirror 会克隆所有分支、标签、notes 等全部引用
+```
 
+创建的就是一个裸仓库，其内容就是远程仓库 `.git` 目录内容
+
+能创建一个远程仓库的本地镜像，包括所有分支、标签和引用。
+
+```bash
 git bundle create x.bundle --all
 #在现有仓库中打包所有内容为单个文件
 
