@@ -246,6 +246,12 @@ cat cat /etc/gitlab/initial_root_password
 
 配置ssh密钥
 
+配置自动打板
+
+1、管理员设置 -> 网络 -> 出站请求 -> 勾选《允许来自 webhooks 和集成对本地网络的请求》
+
+2、项目设置 -> webhook -> 填写名称、url、密钥令牌和触发器（推送事件，Merge request events）
+
 安装Jenkins
 
 ```bash
@@ -280,7 +286,7 @@ cd /var/lib/jenkins/updates
 sed -i 's|https://updates.jenkins.io/download|https://mirrors.huaweicloud.com/jenkins|g' /var/lib/jenkins/updates/default.json
 ```
 
-安装chinese，git，publish over ssh，pipeline
+安装chinese，git，publish over ssh，pipeline，email extention，gitlab
 
 配置邮箱通知
 
@@ -354,9 +360,12 @@ cat /var/lib/jenkins/.ssh/id_ed25519_gitee.pub
 Username git
 Private Key 生成的密钥
 ```
-新建jenkins任务
+添加gitlab api token
+
+新建jenkins任务（手动打版）
 选择自由风格软件项目
 源码管理选择git
+
 ```
 Repository URL：git@gitee.com:jianzhehui/eladmin.git
 Credentials：gitee-eladmin-readonly
@@ -377,7 +386,7 @@ export PATH="$JAVA_HOME/bin:$MVN_HOME/bin:$NODE_HOME:$PATH"
 export MAVEN_OPTS="-Xmx1024m"
 
 COMMIT_ID=$(git rev-parse HEAD)
-OUTPTU_DIR="$WORKSPACE/artifacts/$BUILD_NUMBER"
+OUTPTU_DIR="$WORKSPACE/artifacts/${BUILD_NUMBER}-manual"
 mkdir -p "$OUTPTU_DIR"
 
 cd "$WORKSPACE/eladmin"
@@ -405,15 +414,85 @@ printf "release = %s\ncommit = %s\nbuild_time = %s\n" "$BUILD_NUMBER" "$COMMIT_I
 
 ```bash
 Source files
-artifacts/$BUILD_NUMBER/**
+artifacts/${BUILD_NUMBER}-manual /**
 
 Remove prefix
-artifacts/$BUILD_NUMBER
+artifacts/${BUILD_NUMBER}-manual 
 
 Remote directory
-$BUILD_NUMBER
+${BUILD_NUMBER}-auto
 
 Exec command
-ln -sfn /opt/eladmin/artifacts/$BUILD_NUMBER /opt/eladmin/artifacts/current
+ln -sfn /opt/eladmin/artifacts/${BUILD_NUMBER}-auto /opt/eladmin/artifacts/current && systemctl restart eladmin
+```
+
+新建jenkins任务（自动打版）
+
+大部分内容同上
+
+在trigger处选择gitlab并配置
+
+将生成的secret token复制并粘贴到gitlab项目中的webhook中
+
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+export JAVA_HOME=/opt/jdk-21
+export MVN_HOMAE=/opt/maven
+export NODE_HOME=/opt/node
+export PATH="$JAVA_HOME/bin:$MVN_HOME/bin:$NODE_HOME:$PATH"
+export MAVEN_OPTS="-Xmx1024m"
+
+COMMIT_ID=$(git rev-parse HEAD)
+OUTPTU_DIR="$WORKSPACE/artifacts/${BUILD_NUMBER}-auto"
+mkdir -p "$OUTPTU_DIR"
+
+cd "$WORKSPACE/eladmin"
+mvn -B -ntp -T 1C -Dmaven.test.skip=true clean package
+
+cd "$WORKSPACE/eladmin-web"
+npm config set registry https://registry.npmmirror.com
+npm install
+npm run build:prod
+
+cd "$WORKSPACE"
+cp eladmin/eladmin-system/target/eladmin-system-1.1.jar "$OUTPUT_DIR/eladmin.jar"
+cp -r eladmin-web/dist "$OUTPUT_DIR/dist"
+
+DATE=$(date)
+printf "release = %s\ncommit = %s\nbuild_time = %s\n" "$BUILD_NUMBER" "$COMMIT_ID" "$DATE" > "$OUTPUT_DIR/buildinfo.txt"
+```
+
+构建后操作
+增加构建后操作步骤 -> Editable Email Notification
+在Project Recipient List中填入收件邮箱
+高级设置中添加trigger，选择Failure - Any,Fixed
+
+增加构建后操作步骤 -> publish over ssh
+
+```bash
+Source files
+artifacts/${BUILD_NUMBER}-auto/**
+
+Remove prefix
+artifacts/${BUILD_NUMBER}-auto
+
+Remote directory
+${BUILD_NUMBER}-auto
+
+Exec command
+ln -sfn /opt/eladmin/artifacts/${BUILD_NUMBER}-auto /opt/eladmin/artifacts/current && systemctl restart eladmin
+```
+
+回滚脚本
+
+```bash
+#!/bin/bash
+FILE=$(ls -t /opt/eladmin/artifacts | sed -n '3p' | awk '{print $(NF)}')
+ln -sfn "/opt/eladmin/artifacts/$FILE" /opt/eladmin/artifacts/current
+echo "rollback to /opt/eladmin/artifacts/$FILE"
+
 ```
 

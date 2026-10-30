@@ -166,7 +166,7 @@ mysql -uroot -p
 
 flush privileges;
 
-alter user 'root'@'localhost' identified by 'Ifcfg-ens224'
+alter user 'root'@'localhost' identified by 'Ifcfg-ens224';
 set password for 'root'@'localhost' = 'Ifcfg-ens224';
 #修改密码
 
